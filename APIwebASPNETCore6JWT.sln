@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1700.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIwebASPNETCore6JWT", "APIwebASPNETCore6JWT\APIwebASPNETCore6JWT.csproj", "{B9D5C9D9-0FCD-4E87-9448-2FA76F53A438}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimalAPIASPNETCore6JWT", "MinimalAPIASPNETCore6JWT\MinimalAPIASPNETCore6JWT.csproj", "{F0ED92C0-464F-47A9-89AE-4EFE3EB8C4FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B9D5C9D9-0FCD-4E87-9448-2FA76F53A438}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9D5C9D9-0FCD-4E87-9448-2FA76F53A438}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9D5C9D9-0FCD-4E87-9448-2FA76F53A438}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9D5C9D9-0FCD-4E87-9448-2FA76F53A438}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0ED92C0-464F-47A9-89AE-4EFE3EB8C4FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0ED92C0-464F-47A9-89AE-4EFE3EB8C4FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0ED92C0-464F-47A9-89AE-4EFE3EB8C4FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0ED92C0-464F-47A9-89AE-4EFE3EB8C4FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7B28BD14-7881-425B-BCFD-20B6B39EBFF4}
+	EndGlobalSection
+EndGlobal
