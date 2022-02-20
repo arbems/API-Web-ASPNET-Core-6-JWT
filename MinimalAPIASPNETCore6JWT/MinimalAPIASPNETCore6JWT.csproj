@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Entities\" />
     <None Remove="Models\" />
     <None Remove="Persistence\" />
     <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
@@ -24,7 +23,6 @@
     <None Remove="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Entities\" />
     <Folder Include="Models\" />
     <Folder Include="Persistence\" />
   </ItemGroup>

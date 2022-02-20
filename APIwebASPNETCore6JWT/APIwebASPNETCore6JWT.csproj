@@ -22,11 +22,9 @@
     <None Remove="Microsoft.EntityFrameworkCore" />
     <None Remove="Microsoft.EntityFrameworkCore.InMemory" />
     <None Remove="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
-    <None Remove="Entities\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Persistence\" />
-    <Folder Include="Entities\" />
   </ItemGroup>
 </Project>
