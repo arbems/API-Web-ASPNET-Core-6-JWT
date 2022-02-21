@@ -8,7 +8,7 @@ En este proyecto exploraremos las características de los JSON Web Tokens, su co
 * Entity Framework Core
 * JSON Web Token
 
-```csharp
+```C#
 require 'redcarpet'
 markdown = Redcarpet.new("Hello World!")
 puts markdown.to_html
