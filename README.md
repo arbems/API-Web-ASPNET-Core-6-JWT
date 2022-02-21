@@ -7,3 +7,10 @@ En este proyecto exploraremos las características de los JSON Web Tokens, su co
 * ASP.NET Core Identity.
 * Entity Framework Core
 * JSON Web Token
+
+```ruby
+require 'redcarpet'
+markdown = Redcarpet.new("Hello World!")
+puts markdown.to_html
+puts markdown.to_html
+```
