@@ -161,9 +161,15 @@ public async Task<ActionResult> Post([FromForm] AuthenticateRequest request)
 }
 ```
 ## Probando
-4. Para hacer pruebas llamamos a método `get` utilizando Postman. Hay que añadir `Bearer token` en la pestaña *Authorization*
+1. Obtenemos token llamando a método `post` utilizando Postman.
+
+![Esta es una imagen](image-2.png)
+
+3. Para hacer pruebas con el token obtenido llamamos a método `get`. Hay que añadir `Bearer token` en la pestaña *Authorization*
+
 ![Esta es una imagen](image-1.png)
 
 ## Enlaces de interés
 Para jugar con los JWT [jwt.io](https://jwt.io/) permite decodificar, verificar y generar...
+
 [Tokens](https://auth0.com/docs/secure/tokens)
