@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace APIwebASPNETCore6JWT.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("")]
 public class JTWController : ControllerBase
 {
     private readonly IConfiguration _configuration;
@@ -40,7 +40,7 @@ public class JTWController : ControllerBase
     /// Get info user
     /// </summary>
     /// <returns></returns>
-    [HttpGet]
+    [HttpGet("me")]
     [Authorize]
     public async Task<ActionResult> Get()
     {
@@ -64,7 +64,7 @@ public class JTWController : ControllerBase
     /// </summary>
     /// <param name="request"></param>
     /// <returns>AccessToken</returns>
-    [HttpPost]
+    [HttpPost("token")]
     public async Task<ActionResult> Post([FromForm] AuthenticateRequest request)
     {
         var user = await _userManager.FindByNameAsync(request.UserName);
