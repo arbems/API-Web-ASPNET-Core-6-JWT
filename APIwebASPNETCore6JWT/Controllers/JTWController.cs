@@ -42,7 +42,7 @@ public class JTWController : ControllerBase
     /// <returns></returns>
     [HttpGet("me")]
     [Authorize]
-    public async Task<ActionResult> Get()
+    public ActionResult Get()
     {
         var user = _contextAccessor?.HttpContext?.User;
 

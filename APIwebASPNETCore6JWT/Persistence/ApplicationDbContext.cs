@@ -33,10 +33,10 @@ public static class SeedData
 
             var newUser = new User
             {
-                Email = "alberto@test.com",
-                FirstName = "moreno",
-                LastName = "simon",
-                UserName = "alberto"
+                Email = "user@test.com",
+                FirstName = "Simón",
+                LastName = "Moreno",
+                UserName = "Alberto"
             };
 
             await userManager.CreateAsync(newUser, "P@ss.W0rd");

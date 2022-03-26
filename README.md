@@ -1,9 +1,9 @@
 # ASP.NET Core 6 API web & JSON Web Token
 Seguridad en servicios Web API de .NET Core usando JSON Web Tokens.
 
-En este proyecto exploraremos las características de los JSON Web Tokens, su composición y su implementación utilizando:
+Solución con APIs web ASP.NET Core y características de los JSON Web Tokens, su composición y su implementación utilizando:
 
-* ASP.NET Core 6
+* ASP.NET Core 6 (API web controllers & Minimal API)
 * ASP.NET Core Identity.
 * Entity Framework Core
 * JSON Web Token
@@ -161,7 +161,7 @@ public async Task<ActionResult> Post([FromForm] AuthenticateRequest request)
 }
 ```
 ## Probando
-1. Obtenemos token llamando a método `post` utilizando Postman.
+1. Obtenemos token llamando a método `post` utilizando Postman (user: Alberto pass: P@ss.W0rd).
 
 ![Esta es una imagen](image-2.png)
 
