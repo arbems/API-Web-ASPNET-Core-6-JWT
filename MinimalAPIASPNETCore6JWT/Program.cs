@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -7,19 +6,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MinimalAPIASPNETCore6JWT.Entities;
+using MinimalAPIASPNETCore6JWT;
+using MinimalAPIASPNETCore6JWT.Authorization;
+using MinimalAPIASPNETCore6JWT.Identity;
 using MinimalAPIASPNETCore6JWT.Models;
-using MinimalAPIASPNETCore6JWT.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("TestDatabase"))
-    .AddIdentityCore<User>()
+builder.Services.AddDbContext<AppIdentityDbContext>(options => options.UseInMemoryDatabase("TestDatabase"))
+    .AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<AppIdentityDbContext>();
+
+builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 
 builder.Services
-    .AddHttpContextAccessor()
     .AddAuthorization()
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -30,6 +31,7 @@ builder.Services
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+
             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
             ValidAudience = builder.Configuration["JwtSettings:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
@@ -41,7 +43,7 @@ builder.Services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo Security Minimal API ASPNET Core 6", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo JSON Web Tokens Minimal API ASPNET Core 6", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -69,7 +71,8 @@ builder.Services.AddSwaggerGen(option =>
 
 var app = builder.Build();
 
-await SeedData.Inicialize(app);
+app.Logger.LogInformation("Seeding Database...");
+await AppIdentityDbContextSeed.SeedAsync(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -83,66 +86,31 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapPost("/token", async ([FromBody] AuthenticateRequest request, UserManager<User> userManager) =>
+app.MapGet("/currentUser", async (HttpContext context, ITokenClaimsService tokenClaimsService) =>
 {
-    var user = await userManager.FindByNameAsync(request.UserName);
-
-    if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
-    {
-        return Results.Forbid();
-    }
-
-    return Results.Ok(new
-    {
-        AccessToken = await GetJwt(userManager, user, builder.Configuration)
-    });
-});
-app.MapGet("/me", (IHttpContextAccessor contextAccessor) =>
-{
-    var user = contextAccessor?.HttpContext?.User;
-
-    return Results.Ok(new
-    {
-        Claims = user?.Claims.Select(s => new
-        {
-            s.Type,
-            s.Value
-        }).ToList(),
-        user?.Identity?.Name,
-        user?.Identity?.IsAuthenticated,
-        user?.Identity?.AuthenticationType
-    });
+    return context.User.Identity.IsAuthenticated ?
+            await UserInfo.CreateUserInfo(context.User, await tokenClaimsService.GetTokenAsync(context.User.Identity.Name))
+            : UserInfo.Anonymous;
 })
 .RequireAuthorization();
 
-app.Run();
-
-
-async Task<string> GetJwt(UserManager<User> userManager, User user, ConfigurationManager configuration)
+app.MapPost("/authenticate", async ([FromBody] AuthenticateRequest request,
+    UserManager<ApplicationUser> userManager,
+    ITokenClaimsService tokenClaimsService) =>
 {
-    var roles = await userManager.GetRolesAsync(user);
-    var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Sid, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.GivenName, $"{user.FirstName} {user.LastName}")
-        };
+    var response = new AuthenticateResponse();
 
-    foreach (var role in roles)
+    var user = await userManager.FindByNameAsync(request.UserName);
+
+    var succeeded = await userManager.CheckPasswordAsync(user, request.Password);
+
+    if (succeeded)
     {
-        claims.Add(new Claim(ClaimTypes.Role, role));
+        response.Succeeded = succeeded;
+        response.Token = await tokenClaimsService.GetTokenAsync(request.UserName);
     }
 
-    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]));
-    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
-    var tokenDescriptor = new JwtSecurityToken(
-        issuer: configuration["JwtSettings:Issuer"],
-        audience: configuration["JwtSettings:Audience"],
-        claims: claims,
-        expires: DateTime.Now.AddMinutes(720),
-        signingCredentials: credentials);
+    return response;
+});
 
-    var jwt = new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
-
-    return jwt;
-}
+app.Run();

@@ -1,6 +1,6 @@
 ﻿using System.Text;
-using APIwebASPNETCore6JWT.Entities;
-using APIwebASPNETCore6JWT.Persistence;
+using APIwebASPNETCore6JWT;
+using APIwebASPNETCore6JWT.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("TestDatabase"))
-    .AddIdentityCore<User>()
+builder.Services.AddDbContext<AppIdentityDbContext>(options => options.UseInMemoryDatabase("TestDatabase"))
+    .AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<AppIdentityDbContext>();
+
+builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 
 builder.Services
-    .AddHttpContextAccessor()
     .AddAuthorization()
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -30,17 +31,18 @@ builder.Services
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+
             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
             ValidAudience = builder.Configuration["JwtSettings:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
         };
-    });
+    });    
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo Security API Controllers ASPNET Core 6", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo JSON Web Tokens API Controllers ASPNET Core 6", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -68,7 +70,8 @@ builder.Services.AddSwaggerGen(option =>
 
 var app = builder.Build();
 
-await SeedData.Inicialize(app);
+app.Logger.LogInformation("Seeding Database...");
+await AppIdentityDbContextSeed.SeedAsync(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

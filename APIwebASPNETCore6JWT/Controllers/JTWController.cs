@@ -1,113 +1,49 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using APIwebASPNETCore6JWT.Entities;
-using APIwebASPNETCore6JWT.Models;
+﻿using APIwebASPNETCore6JWT.Authorization;
+using APIwebASPNETCore6JWT.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace APIwebASPNETCore6JWT.Controllers;
 
 [ApiController]
-[Route("")]
+[Route("api")]
 public class JTWController : ControllerBase
 {
-    private readonly IConfiguration _configuration;
-
-    private readonly ILogger<JTWController> _logger;
-
-    private readonly UserManager<User> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly IHttpContextAccessor _contextAccessor;
+    private readonly ITokenClaimsService _tokenClaimsService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public JTWController(
-        ILogger<JTWController> logger,
-        IConfiguration configuration,
-        UserManager<User> userManager,
-        RoleManager<IdentityRole> roleManager,
-        IHttpContextAccessor contextAccessor)
+        ITokenClaimsService tokenClaimsService,
+        UserManager<ApplicationUser> userManager)
     {
-        _logger = logger;
-        _configuration = configuration;
+        _tokenClaimsService = tokenClaimsService;
         _userManager = userManager;
-        _roleManager = roleManager;
-        _contextAccessor = contextAccessor;
     }
 
-    /// <summary>
-    /// Get info user
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("me")]
+    [HttpGet("currentUser")]
     [Authorize]
-    public ActionResult Get()
-    {
-        var user = _contextAccessor?.HttpContext?.User;
+    public async Task<IActionResult> GetCurrentUser() =>
+        Ok(User.Identity.IsAuthenticated ?
+            await UserInfo.CreateUserInfo(User, await _tokenClaimsService.GetTokenAsync(User.Identity.Name))
+            : UserInfo.Anonymous);
 
-        return Ok(new
-        {
-            Claims = user?.Claims.Select(s => new
-            {
-                s.Type,
-                s.Value
-            }).ToList(),
-            user?.Identity?.Name,
-            user?.Identity?.IsAuthenticated,
-            user?.Identity?.AuthenticationType
-        });
-    }
-
-    /// <summary>
-    /// Get access token
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns>AccessToken</returns>
-    [HttpPost("token")]
-    public async Task<ActionResult> Post([FromForm] AuthenticateRequest request)
+    [HttpPost("authenticate")]
+    public async Task<ActionResult<AuthenticateResponse>> Authenticate([FromForm] AuthenticateRequest request)
     {
+        var response = new AuthenticateResponse();
+
         var user = await _userManager.FindByNameAsync(request.UserName);
 
-        if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
+        var succeeded = await _userManager.CheckPasswordAsync(user, request.Password);
+
+        if (succeeded)
         {
-            return Forbid();
+            response.Succeeded = succeeded;
+            response.Token = await _tokenClaimsService.GetTokenAsync(request.UserName);
         }
 
-        return Ok(new
-        {
-            AccessToken = await GetJwt(user)
-        });
-    }
-
-
-    private async Task<string> GetJwt(User user)
-    {
-        var roles = await _userManager.GetRolesAsync(user);
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Sid, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.GivenName, $"{user.FirstName} {user.LastName}")
-        };
-
-        foreach (var role in roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
-
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
-        var tokenDescriptor = new JwtSecurityToken(
-            issuer: _configuration["JwtSettings:Issuer"],
-            audience: _configuration["JwtSettings:Audience"],
-            claims: claims,
-            expires: DateTime.Now.AddMinutes(720),
-            signingCredentials: credentials);
-
-        var jwt = new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
-
-        return jwt;
+        return response;
     }
 }
 
