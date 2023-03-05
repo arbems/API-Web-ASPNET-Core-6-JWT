@@ -1,7 +1,7 @@
 # JSON Web Tokens en ASP.NET Core 6
-Este repositorio contiene los ejemplos que muestran como autenticar usuarios en ASP.NET Core 6 usando JSON Web Tokens(JWT), para manejar la autenticación en aplicaciones.
+Examples that show how to authenticate users in ASP.NET Core 6 using JSON Web Tokens(JWT), to handle authentication in applications.
 
-De este modo cuando el usuario se quiere autenticar envía sus datos de inicio del sesión al servidor, este genera el JWT y se lo manda a la aplicación cliente, luego en cada petición el cliente envía este token que el servidor usa para verificar que el usuario este correctamente autenticado y permitiendo al usuario acceder a rutas, servicios o recursos que solo están permitidos con su debido token. Este token se usa como método de autenticación y autorización por parte de la aplicación cliente frente al servidor que aloja el recurso.
+In this way, when the user wants to authenticate, he sends his login data to the server, it generates the JWT and sends it to the client application, then in each request the client sends this token that the server uses to verify that the user is correctly authenticated and allowing the user to access routes, services or resources that are only allowed with the proper token. This token is used as a method of authentication and authorization by the client application against the server that hosts the resource.
 
 ## Tecnologías
 
