@@ -24,7 +24,6 @@
     <None Remove="Authorization\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Identity\" />
     <Folder Include="Authorization\" />
   </ItemGroup>
 </Project>
